@@ -1,0 +1,5 @@
+Independent continuation of https://github.com/matthewwall/weewx-wh23xx
+Upstream history and copyright notices are retained.
+Changes by weewx-packages are dated in modified source files.
+Python 3 changes incorporate work proposed by ra1u in upstream PR #12.
+Device configuration follows the interface proposed in upstream PR #1.

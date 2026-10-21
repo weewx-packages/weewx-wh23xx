@@ -1,4 +1,5 @@
 # installer for wh23xx driver
+# Modified 2026-10-22 by weewx-packages.
 # Copyright 2016 Matthew Wall
 # Distributed under the terms of the GNU Public License (GPLv3)
 
@@ -10,7 +11,7 @@ def loader():
 class WH23xxInstaller(ExtensionInstaller):
     def __init__(self):
         super(WH23xxInstaller, self).__init__(
-            version="0.14",
+            version="0.15.0",
             name='wh23xx',
             description='Collect data from wh23xx weather stations',
             author="Matthew Wall",

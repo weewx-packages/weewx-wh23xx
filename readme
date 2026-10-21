@@ -26,3 +26,24 @@ sudo wee_config --reconfigure
 4) start weewx
 
 sudo /etc/init.d/weewx start
+
+Independent continuation (0.15.0)
+
+This repository preserves matthewwall/weewx-wh23xx history and GPL-3.0-only
+licensing. Python 3 fixes build on upstream PR #12. PR #11's exception syntax
+was not used: `except (IndexError, e)` does not bind the exception to e.
+
+    weectl extension install https://github.com/weewx-packages/weewx-wh23xx/archive/refs/tags/v0.15.0.zip
+    weectl station reconfigure --driver=user.wh23xx --config=/path/to/weewx.conf
+
+The configurator supports --info, --info-all, --current, --sync-time,
+--eeprom-time, --eeprom-dump-raw and --clear-history through `weectl device`.
+Stop WeeWX before accessing the USB device. Mutating operations prompt first.
+
+The driver accepts vendor_id and product_id in [WH23xx], for example
+`vendor_id = 0x10c4` and `product_id = 0x8468`. Different IDs alone do not prove
+protocol compatibility. Confirm the device and a valid checksum before use.
+
+Run `python -m pytest -q tests`. Tests exercise split USB records, checksum
+rejection, bounded retries, Python 3 decoding, configurator access, and WeeWX
+editor loading. Verify WH2303/WH2310/WH2315 operation on the actual devices.
