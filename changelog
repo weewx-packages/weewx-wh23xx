@@ -1,4 +1,4 @@
-Unreleased
+0.15.1 23oct2026
 * fixed NameError in the test-decode-info action
 
 0.14 10dec2017
