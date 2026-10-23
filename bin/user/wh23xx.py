@@ -259,7 +259,7 @@ from weeutil.weeutil import timestamp_to_string
 from weewx.wxformulas import calculate_rain
 
 DRIVER_NAME = 'WH23xx'
-DRIVER_VERSION = '0.15.0'
+DRIVER_VERSION = '0.15.1'
 
 def loader(config_dict, _):
     return WH23xxDriver(**config_dict[DRIVER_NAME])

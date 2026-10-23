@@ -85,7 +85,7 @@ def test_confeditor_import_with_weewx(monkeypatch):
     editor, name, version = weecfg.load_driver_editor('user.wh23xx')
     assert name == 'WH23xx'
     assert 'user.wh23xx' in editor.default_stanza
-    assert version == '0.15.0'
+    assert version == '0.15.1'
 
 
 def test_standalone_test_decode_info():
