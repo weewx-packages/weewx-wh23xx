@@ -1,62 +1,73 @@
 # Fine Offset WH23xx for WeeWX
 
-Collect weather observations from a Fine Offset WH23xx console over USB. The
-upstream hardware notes include Tycon TP2700 and Froggit WH4000 variants. The
-driver supplies temperature/humidity, wind/gust, pressure, light, UV and rain.
-Matching a brand or USB ID alone does not establish protocol compatibility.
+A WeeWX driver that collects current observations from a Fine Offset WH23xx
+console over USB: temperature, humidity, wind and gust, pressure, rain, light
+and UV. The source names the WH2300, WH2301, WH4000 and Tycon TP2700. Matching a
+brand or USB ID alone does not establish protocol compatibility.
 
-This independent continuation preserves
-[matthewwall/weewx-wh23xx](https://github.com/matthewwall/weewx-wh23xx) history.
-Release 0.15.0 includes Python 3 decoding, checksum/retry handling and WeeWX's
-device configurator. No WH2303/WH2310/WH2315 hardware check is claimed here.
+This is an independent continuation of
+[matthewwall/weewx-wh23xx](https://github.com/matthewwall/weewx-wh23xx), ported
+to Python 3 with checksum checks across USB packets and a `weectl device`
+configurator. [NOTICE](NOTICE) credits the upstream work it builds on.
 
-## Install
+## Requirements
 
-An existing WeeWX station is required. Replace `/path/to/weewx.conf`
-with its configuration file before running the commands.
+- A WH23xx console connected over USB.
+- The platform USB backend. Debian and Ubuntu provide it in `libusb-1.0-0`.
+- Access to the USB device for the user that runs WeeWX.
+- The Python USB library, installed in the Python environment that runs WeeWX:
 
-The catalog release requires Python >=3.10 and WeeWX >=5.2,<6.
+  ```sh
+  python -m pip install 'pyusb>=1,<2'
+  ```
 
-Before running the commands, activate the existing virtual environment that
-runs your WeeWX service. Both `python` and `weectl` must come from that
-environment. For an OS-packaged WeeWX installation, use compatible distribution
-packages instead, or migrate WeeWX and its service to a virtual environment
-first. Installing into an unrelated virtual environment will not supply the
-running service with dependencies.
+  Activate that environment first, so that `python` and `weectl` both come from
+  it. For an OS-packaged WeeWX, install the distribution package for PyUSB
+  instead.
 
-Install the platform USB backend before running the driver. Debian/Ubuntu
-provides it in `libusb-1.0-0`. Grant the WeeWX service user access to the console.
-Install the Python USB library in the activated WeeWX environment:
+## Installation
+
+Install `wh23xx` from the [WeeWX packages catalog](https://github.com/weewx-packages/catalog/blob/main/packages/wh23xx.md).
+The catalog page lists the current release, its WeeWX and Python
+requirements, and the install, update and removal commands.
+
+Then select the driver and restart WeeWX:
 
 ```sh
-python -m pip install 'pyusb>=1,<2'
-```
-
-Use the `weectl` from your WeeWX Python environment:
-
-```sh
-weectl extension install https://github.com/weewx-packages/weewx-wh23xx/releases/download/v0.15.0/weewx-wh23xx-0.15.0.zip --config=/path/to/weewx.conf
 weectl station reconfigure --driver=user.wh23xx --config=/path/to/weewx.conf
 ```
 
-Stock WeeWX 5 accepts this fixed URL or a downloaded copy of the same archive.
-No catalog integration is required. Restart WeeWX yourself after configuration
-changes.
-
-## Select USB acquisition
+## Configuration
 
 ```ini
 [Station]
     station_type = WH23xx
+
 [WH23xx]
     driver = user.wh23xx
-    poll_interval = 15
-    vendor_id = 0x10c4
-    product_id = 0x8468
 ```
 
-Change USB IDs only for a device known to use the WH23xx protocol. Only one
-process should access the console. Stop WeeWX before using device diagnostics:
+| Option | Default | Meaning |
+|---|---|---|
+| `model` | `Tycon TP2700` | Hardware name that WeeWX reports. |
+| `poll_interval` | `15` | Seconds between reads of current data. |
+| `max_tries` | `5` | Read attempts before the driver gives up. |
+| `retry_wait` | `10` | Seconds between read attempts. |
+| `vendor_id` | `0x10c4` | USB vendor ID of the console. |
+| `product_id` | `0x8468` | USB product ID of the console. |
+| `debug_rain` | `0` | Set to `1` to log each change of the rain counter. |
+
+Change the USB IDs only for a device known to use the WH23xx protocol.
+
+The driver reports in `METRICWX` units. `UV` holds the UV index from the
+console. `radiation` is computed from `luminosity` with a fixed factor of
+0.0079. The raw UV reading goes into `uv_raw`, which the default WeeWX schema
+does not store.
+
+### Device diagnostics
+
+Only one process can use the console. Stop WeeWX before you run these, and
+restart it afterwards:
 
 ```sh
 weectl device --help --config=/path/to/weewx.conf
@@ -65,14 +76,32 @@ weectl device --current --config=/path/to/weewx.conf
 ```
 
 The configurator also provides `--info-all`, `--eeprom-time`,
-`--eeprom-dump-raw`, `--sync-time` and `--clear-history`. The last two change the
-device and prompt first. Do not clear history to diagnose a read failure.
-Restart WeeWX after standalone access. Check logs for USB permissions, failed
-checksums or exhausted retries; offline decoding cannot establish RF reception.
+`--eeprom-dump-raw`, `--sync-time` and `--clear-history`. The last two change
+the console and ask for confirmation unless you pass `-y`. Do not clear the
+history to diagnose a read failure.
 
-Copyright 2016 Matthew Wall. GPL-3.0-only; see [license](license).
-[NOTICE](NOTICE) credits ra1u's Python 3 proposal and the original device
-configuration interface. Source protocol notes remain in
-[wh23xx.py](bin/user/wh23xx.py).
+For read failures, check the WeeWX log for USB permission errors, checksum
+mismatches and exceeded retries.
 
-<!-- Documentation updated 2026-10-23 by weewx-packages. -->
+## Limitations
+
+- Not tested on WH23xx hardware by weewx-packages.
+- The driver reads current data only. It does not import the history stored in
+  the console.
+- `radiation` is an approximation derived from light, not a measurement.
+- The tests decode recorded byte sequences. They cannot show that a console
+  receives its outdoor sensors.
+
+## Development
+
+Run the tests in a Python environment with WeeWX, PyUSB and pytest:
+
+```sh
+python -m pytest -q tests
+```
+
+## License
+
+Copyright 2016 Matthew Wall. Distributed under the GNU General Public License
+version 3; see [license](license). The source carries the protocol notes and
+credits Lloyd Kinsella.
