@@ -12,13 +12,24 @@ device configurator. No WH2303/WH2310/WH2315 hardware check is claimed here.
 
 ## Install
 
+An existing WeeWX station is required. Replace `/path/to/weewx.conf`
+with its configuration file before running the commands.
+
 The catalog release requires Python >=3.10 and WeeWX >=5.2,<6.
 
-Install `pyusb` in the WeeWX Python environment and the platform USB backend,
-such as libusb. Grant the WeeWX service user access to the console:
+Before running the commands, activate the existing virtual environment that
+runs your WeeWX service. Both `python` and `weectl` must come from that
+environment. For an OS-packaged WeeWX installation, use compatible distribution
+packages instead, or migrate WeeWX and its service to a virtual environment
+first. Installing into an unrelated virtual environment will not supply the
+running service with dependencies.
+
+Install the platform USB backend before running the driver. Debian/Ubuntu
+provides it in `libusb-1.0-0`. Grant the WeeWX service user access to the console.
+Install the Python USB library in the activated WeeWX environment:
 
 ```sh
-python -m pip install pyusb
+python -m pip install 'pyusb>=1,<2'
 ```
 
 Use the `weectl` from your WeeWX Python environment:
@@ -28,9 +39,9 @@ weectl extension install https://github.com/weewx-packages/weewx-wh23xx/releases
 weectl station reconfigure --driver=user.wh23xx --config=/path/to/weewx.conf
 ```
 
-Replace `/path/to/weewx.conf` with your station configuration. Stock WeeWX 5
-accepts this fixed URL or a downloaded copy of the same archive. No catalog
-integration is required. Restart WeeWX yourself after configuration changes.
+Stock WeeWX 5 accepts this fixed URL or a downloaded copy of the same archive.
+No catalog integration is required. Restart WeeWX yourself after configuration
+changes.
 
 ## Select USB acquisition
 
