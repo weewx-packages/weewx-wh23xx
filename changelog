@@ -1,3 +1,6 @@
+Unreleased
+* fixed NameError in the test-decode-info action
+
 0.14 10dec2017
 * hardware_name is a property
 

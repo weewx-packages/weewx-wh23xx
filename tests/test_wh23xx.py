@@ -1,7 +1,10 @@
 # Copyright 2026 weewx-packages
 # Distributed under the terms of the GNU Public License (GPLv3)
 import importlib.util
+import os
 from pathlib import Path
+import subprocess
+import sys
 from unittest.mock import Mock
 
 import pytest
@@ -83,3 +86,11 @@ def test_confeditor_import_with_weewx(monkeypatch):
     assert name == 'WH23xx'
     assert 'user.wh23xx' in editor.default_stanza
     assert version == '0.15.0'
+
+
+def test_standalone_test_decode_info():
+    env = dict(os.environ, PYTHONPATH=str(Path(__file__).parents[1] / 'bin'))
+    result = subprocess.run([sys.executable, '-m', 'user.wh23xx', '--action=test-decode-info'],
+                            env=env, capture_output=True, text=True, timeout=30)
+    assert result.returncode == 0, result.stderr
+    assert "'model': '0x0023'" in result.stdout
