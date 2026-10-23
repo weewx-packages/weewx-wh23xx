@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # Modified 2026-10-22 by weewx-packages.
+# Modified 2026-10-23 by weewx-packages: fix NameError in test-decode-info.
 # Copyright 2016 Matthew Wall
 # Distributed under the terms of the GNU Public License (GPLv3)
 #
@@ -1068,7 +1069,7 @@ if __name__ == '__main__':
     elif options.action == 'test-decode-info':
         for row in INFO_DATA:
             raw = [int(x, 16) for x in row.split()]
-            print(fmt(raw))
+            print(_fmt(raw))
             print(WH23xxStation.decode_station_info(raw))
     elif options.action == 'test-decode-current':
         for row in CURRENT_DATA:
